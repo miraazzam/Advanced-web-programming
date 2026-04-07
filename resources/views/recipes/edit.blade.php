@@ -31,39 +31,20 @@
 
 <div class="form-box">
 
-    <div class="d-flex justify-content-between mb-3">
-        <h2>Edit Recipe</h2>
-        <a href="{{ route('recipes.index') }}" class="btn btn-light btn-sm">Back</a>
-    </div>
+    <h2>Edit Recipe</h2>
 
     <form method="POST" action="{{ route('recipes.update', $recipe->id) }}">
         @csrf
         @method('PUT')
 
-        <input class="form-control mb-2"
-               name="title"
-               value="{{ old('title', $recipe->title) }}"
-               placeholder="Title">
+        <input class="form-control mb-2" name="title" value="{{ $recipe->title }}">
+        <textarea class="form-control mb-2" name="description">{{ $recipe->description }}</textarea>
+        <textarea class="form-control mb-2" name="instructions">{{ $recipe->instructions }}</textarea>
+        <input class="form-control mb-2" name="image" value="{{ $recipe->image }}">
+        <input class="form-control mb-2" name="origin_country" value="{{ $recipe->origin_country }}">
+        <input type="number" class="form-control mb-2" name="cooking_time" value="{{ $recipe->cooking_time }}">
 
-        <textarea class="form-control mb-2"
-                  name="description"
-                  placeholder="Description">{{ old('description', $recipe->description) }}</textarea>
-
-        <textarea class="form-control mb-2"
-                  name="instructions"
-                  placeholder="Instructions">{{ old('instructions', $recipe->instructions) }}</textarea>
-
-        <input class="form-control mb-2"
-               name="image"
-               value="{{ old('image', $recipe->image) }}"
-               placeholder="Image URL">
-
-        <input class="form-control mb-3"
-               name="origin_country"
-               value="{{ old('origin_country', $recipe->origin_country) }}"
-               placeholder="Origin Country">
-
-        <button class="btn btn-beige w-100">Update Recipe</button>
+        <button class="btn btn-beige w-100">Update</button>
     </form>
 
 </div>

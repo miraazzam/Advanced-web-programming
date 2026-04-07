@@ -90,8 +90,7 @@
     <div class="d-flex gap-2">
         <a href="/" class="btn btn-beige btn-sm btn-custom"><b>Home</b></a>
         <a href="/recipes" class="btn btn-beige btn-sm btn-custom"><b>Recipes</b></a>
-        <a href="/login" class="btn btn-beige btn-sm btn-custom"><b>Login</b></a>
-        <a href="/register" class="btn btn-beige btn-sm btn-custom"><b>Register</b></a>
+        <a href="/recipes/create" class="btn btn-beige btn-sm btn-custom"><b>Create</b></a>
     </div>
 </nav>
 
@@ -104,12 +103,6 @@
     <div class="row">
 
         @php
-        $fallbackRecipes = [
-            "Tabbouleh", "Shawarma", "Kibbeh", "Hummus", "Pizza Margherita",
-            "Caesar Salad", "Burger", "Sushi", "Pasta Alfredo", "Falafel",
-            "Grilled Chicken", "Brownies"
-        ];
-
         $recipeImages = [
             "Tabbouleh" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQfgqR9vpafPPW8EowuE3EVHG3eGLMPK1Toeg&s",
             "Shawarma" => "https://b3067249.smushcdn.com/3067249/wp-content/uploads/2022/07/Shawarma-848x477.jpg?lossy=0&strip=1&webp=1",
@@ -119,7 +112,9 @@
             "Caesar Salad" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRV5Yp0uPt-uqJ5udVjAL71-ArAIvCzE84nYQ&s",
             "Burger" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTlNQ2KlqoI-Y1pziuCN5uhV7SvxLuX5nSdFQ&s",
             "Sushi" => "https://www.yakinori.co.uk/wp-content/uploads/2024/11/Untitled-design-12-1024x1024.png",
-            "Pasta Alfredo" => "https://midwestfoodieblog.com/wp-content/uploads/2023/07/chicken-alfredo-1-2.jpg",
+            "Manakish" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR7A1aOwm7AjdGqglfCNto37s4HM96bUKp5sA&s",
+            "Chicken Alfredo" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTkBWB1aXVeB7uc5THFWEXaEHbgY3DJsaTxGA&s",
+            "Mocha Frappe" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ5XlglhBYv9g0ojlSrufzXhtY7IDuC-NrvLA&s",
             "Falafel" => "https://tastythriftytimely.com/wp-content/uploads/2023/06/Falafel-FEATURED.jpg",
             "Grilled Chicken" => "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQnW76NMD7JRb9GprhgdIX3M6naqoUk8-IObA&s",
             "Brownies" => "https://icecreambakery.in/wp-content/uploads/2024/12/Brownie-Recipe-with-Cocoa-Powder-1200x821.jpg"
@@ -131,7 +126,7 @@
         <div class="col-lg-4 col-md-6 mb-4">
             <div class="card recipe-card">
 
-                <img src="{{ $recipeImages[$recipe->title] ?? 'https://picsum.photos/400/300' }}"
+                <img src="{{ $recipeImages[$recipe->title] ?? 'https://picsum.photos/400/300?random='.$recipe->id }}"
                      class="recipe-img"
                      alt="{{ $recipe->title }}">
 
@@ -153,26 +148,36 @@
                     </p>
 
                     <p class="text-beige">
-                        ⭐ {{ number_format($recipe->ratings->avg('rating') ?? 4.6, 1) }}
+                        ⭐ {{ $recipe->rating ?? 4.5 }}
                         <br>
-                        ⏱ {{ $recipe->time_to_cook ?? rand(10,60) }} min
+                        ⏱ {{ $recipe->cooking_time }} min
                     </p>
 
                     <div class="d-flex gap-2">
 
-                        <!-- FIXED ROUTES (safer Laravel way) -->
-   <a href="/recipes/{{ $recipe->id }}">View</a>
+                        <a href="{{ route('recipes.show', $recipe->id) }}"
+                           class="btn btn-beige btn-sm btn-custom">
+                            <b>View</b>
+                        </a>
 
-<a href="/recipes/{{ $recipe->id }}/edit">Edit</a>
+                        <a href="{{ route('recipes.edit', $recipe->id) }}"
+                           class="btn btn-beige btn-sm btn-custom">
+                            <b>Edit</b>
+                        </a>
 
-<form action="/recipes/{{ $recipe->id }}" method="POST" style="display:inline;">
-    @csrf
-    @method('DELETE')
+                        <form action="{{ route('recipes.destroy', $recipe->id) }}"
+                              method="POST"
+                              onsubmit="return confirm('Delete this recipe?')">
 
-    <button class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">
-        Delete
-    </button>
-</form>
+                            @csrf
+                            @method('DELETE')
+
+                            <button type="submit"
+                                    class="btn btn-danger btn-sm btn-custom">
+                                <b>Delete</b>
+                            </button>
+                        </form>
+
                     </div>
 
                 </div>
@@ -181,58 +186,7 @@
 
         @empty
 
-        @foreach($fallbackRecipes as $name)
-
-        <div class="col-lg-4 col-md-6 mb-4">
-            <div class="card recipe-card">
-
-                <img src="{{ $recipeImages[$name] ?? 'https://picsum.photos/400/300' }}"
-                     class="recipe-img"
-                     alt="{{ $name }}">
-
-                <div class="card-body">
-
-                    <h4 class="text-beige">{{ $name }}</h4>
-
-                    <p class="text-beige small">
-                        Delicious {{ strtolower($name) }} prepared with fresh ingredients.
-                    </p>
-
-                    <hr style="opacity:0.2">
-
-                    <p class="text-beige">
-                        👤 Chef John
-                        <span class="badge badge-role">chef</span>
-                    </p>
-
-                    <p class="text-beige">
-                        ⭐ 4.5 <br>
-                        ⏱ {{ rand(10,45) }} min
-                    </p>
-
-                    <!-- FIXED: buttons now respond (no dead UI) -->
-                    <div class="d-flex gap-2">
-
-                        <a href="#" class="btn btn-beige btn-sm btn-custom">
-                            <b>View</b>
-                        </a>
-
-                        <a href="#" class="btn btn-beige btn-sm btn-custom">
-                            <b>Edit</b>
-                        </a>
-
-                        <button class="btn btn-beige btn-sm btn-custom"
-                                onclick="alert('No database recipe available')">
-                            <b>Delete</b>
-                        </button>
-
-                    </div>
-
-                </div>
-            </div>
-        </div>
-
-        @endforeach
+        <h4 class="text-center text-beige">No recipes found</h4>
 
         @endforelse
 
